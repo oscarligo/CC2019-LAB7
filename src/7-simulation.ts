@@ -1,6 +1,7 @@
 import type { State, NFA } from './4-thompson'
-import { getEpsilonClosure } from './5-subsets'
+import { getDFATransition, getEpsilonClosure } from './5-subsets'
 import type { DFA } from './5-subsets'
+import { matchesTransition } from './2-validator'
 
 
 // Registro de un paso en el NFA
@@ -37,7 +38,6 @@ export function evaluateNFA(nfa: NFA, input: string): NFAResult {
     const steps: NFAStep[] = [];
     let currentStates = getEpsilonClosure([nfa.start]);
 
-    // Paso 0: Estado inicial tras la primera clausura-épsilon
     steps.push({
         symbol: null,
         currentStates: [nfa.start.id],
@@ -50,7 +50,8 @@ export function evaluateNFA(nfa: NFA, input: string): NFAResult {
 
         for (const state of currentStates) {
             for (const transition of state.transitions) {
-                if (transition.symbol === char && !visitedIds.has(transition.to.id)) {
+                // Se utiliza la función de emparejamiento semántico
+                if (matchesTransition(transition.symbol, char) && !visitedIds.has(transition.to.id)) {
                     visitedIds.add(transition.to.id);
                     nextStates.push(transition.to);
                 }
@@ -83,6 +84,7 @@ export function evaluateNFA(nfa: NFA, input: string): NFAResult {
     return { accepted, steps };
 }
 
+
 /**
  * Evalúa una cadena en el DFA registrando cada transición.
  */
@@ -91,7 +93,7 @@ export function evaluateDFA(dfa: DFA, value: string): DFAResult {
     let current = dfa.start;
 
     for (const symbol of value) {
-        const next = current.transitions[symbol];
+        const next = getDFATransition(current, symbol);
 
         if (!next) {
             steps.push({ from: current.id, symbol, to: null });

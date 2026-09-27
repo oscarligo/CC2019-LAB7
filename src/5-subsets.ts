@@ -1,4 +1,5 @@
 import type { NFA, State } from './4-thompson';
+import { matchesTransition } from './2-validator';
 
 // Estado de un afn
 export interface DFAState {
@@ -12,6 +13,11 @@ export interface DFA {
     start: DFAState;
     states: DFAState[];
     alphabet: string[];
+}
+
+export function getDFATransition(state: DFAState, char: string): DFAState | undefined {
+    return state.transitions[char]
+        ?? Object.entries(state.transitions).find(([symbol]) => matchesTransition(symbol, char))?.[1];
 }
 
 // Extraer los símbolos del alfabeto (sin transiciones null)
@@ -116,7 +122,7 @@ export function simulateDFA(dfa: DFA, value: string): boolean {
     let current = dfa.start;
 
     for (const symbol of value) {
-        const next = current.transitions[symbol];
+        const next = getDFATransition(current, symbol);
         if (!next) return false;
         current = next;
     }
