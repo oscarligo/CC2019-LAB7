@@ -105,6 +105,35 @@ h1 {
     text-align: center;
 }
 
+.view-switcher {
+    display: flex;
+    margin: -1.5rem 0 2rem;
+}
+
+.view-switcher button {
+    align-self: flex-start;
+    padding: 0.4rem 0.85rem;
+    color: var(--ink);
+    background: transparent;
+    border: 1px solid var(--rule-dark);
+    font-family: var(--serif);
+    font-size: 0.88rem;
+    cursor: pointer;
+    transition:
+        color 120ms ease,
+        background-color 120ms ease;
+}
+
+.view-switcher button:hover,
+.view-switcher button[aria-pressed="true"] {
+    color: var(--paper);
+    background: var(--ink);
+}
+
+.view-switcher button:focus-visible {
+    outline-offset: 2px;
+}
+
 h2 {
     margin: 2.6rem 0 1rem;
     font-size: 1.55rem;
@@ -170,8 +199,8 @@ code {
 
 .controls button {
     padding: 0.65rem 1.25rem;
-    color: var(--paper);
-    background: var(--ink);
+    color: var(--ink);
+    background: transparent;
     border: 1px solid var(--ink);
     border-radius: 2px;
     font-family: var(--serif);
@@ -184,8 +213,8 @@ code {
 }
 
 .controls button:hover {
-    background: var(--accent-hover);
-    border-color: var(--accent-hover);
+    color: var(--paper);
+    background: var(--ink);
 }
 
 .controls button:focus-visible,
@@ -371,6 +400,18 @@ code {
 .failure-row {
     color: var(--danger);
     background: var(--danger-bg);
+}
+
+.grammar-table {
+    margin-bottom: 1.5rem;
+}
+
+.grammar-valid {
+    color: var(--success);
+}
+
+.grammar-invalid {
+    color: var(--danger);
 }
 
 .nfa-graph,

@@ -1,4 +1,4 @@
-S -> ABC
-A -> aA | B
-B -> bB | C
-C -> cC | ☻
+S→ABC
+A→aA|B
+B→bB|C
+C→cC|☻

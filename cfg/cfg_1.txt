@@ -1,3 +1,3 @@
-S -> aAb | B
-A -> aA | ☻
-B -> bB | b
+S→aAb|B
+A→aA|☻
+B→bB|b

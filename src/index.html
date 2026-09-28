@@ -12,10 +12,13 @@
 
     <body>
         <main class="container">
-        <h1>Lexer: Regular Expression to Automaton</h1>
+        <h1 id="view-title">Lexer: Regular Expression to Automaton</h1>
+        <nav class="view-switcher" aria-label="Views">
+            <button id="lexer-button" type="button" aria-controls="lexer-view" aria-pressed="true">Lexer</button>
+            <button id="grammar-button" type="button" aria-controls="grammar-view" aria-pressed="false">CFG validator</button>
+        </nav>
 
-
-        <section aria-labelledby="manual-view-title">
+        <section id="lexer-view" aria-labelledby="manual-view-title">
         <h2 id="manual-view-title">Infix expression</h2>
 
         <form id="regex-form">
@@ -63,6 +66,11 @@
 
         <h3> Minimized DFA  (partitioning algorithm)</h3>
         <div id="minimized-dfa-container" class="dfa-graph" role="img" aria-label="DFA of the regular expression"></div>
+        </section>
+
+        <section id="grammar-view" aria-labelledby="grammar-view-title" hidden>
+            <h2 id="grammar-view-title">CFG production validation</h2>
+            <div id="grammar-output"></div>
         </section>
         </main>
 

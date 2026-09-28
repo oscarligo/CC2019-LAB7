@@ -6,6 +6,13 @@ import { nfaToDFA } from './5-subsets';
 import { minimizeDFA } from './6-partitions';
 import { evaluateDFA, evaluateNFA } from './7-simulation';
 import {EPSILON} from './4-thompson';
+import { validateGrammarLines } from './grammar';
+
+const grammarFiles = import.meta.glob('../cfg/*.txt', {
+    eager: true,
+    query: '?raw',
+    import: 'default',
+}) as Record<string, string>;
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
@@ -210,4 +217,46 @@ $('regex-form').onsubmit = (event) => {
     void drawManual();
 };
 
+function showView(showingGrammar: boolean): void {
+    $('grammar-view').hidden = !showingGrammar;
+    $('lexer-view').hidden = showingGrammar;
+    $('view-title').textContent = showingGrammar
+        ? 'Context-Free Grammar Validator'
+        : 'Lexer: Regular Expression to Automaton';
+    $('lexer-button').setAttribute('aria-pressed', String(!showingGrammar));
+    $('grammar-button').setAttribute('aria-pressed', String(showingGrammar));
+}
+
+$('lexer-button').onclick = () => showView(false);
+$('grammar-button').onclick = () => showView(true);
+
 void drawManual();
+
+for (const [path, source] of Object.entries(grammarFiles).sort()) {
+    const results = validateGrammarLines(source);
+    const article = document.createElement('article');
+    const title = document.createElement('h3');
+    const fileName = path.split('/').pop()!;
+    const allValid = results.length > 0 && results.every(result => result.valid);
+    title.textContent = `${fileName} — ${allValid ? 'Valid' : 'Invalid'}`;
+    title.className = allValid ? 'grammar-valid' : 'grammar-invalid';
+
+    const table = document.createElement('table');
+    table.className = 'trace-table grammar-table';
+    table.innerHTML = '<thead><tr><th>Line</th><th>Production</th><th>Result</th></tr></thead>';
+    const tbody = table.createTBody();
+    for (const result of results) {
+        const row = tbody.insertRow();
+        row.insertCell().textContent = String(result.line);
+        const production = document.createElement('code');
+        production.textContent = result.production;
+        row.insertCell().append(production);
+        const status = document.createElement('span');
+        status.className = `badge ${result.valid ? 'success' : 'failure'}`;
+        status.textContent = result.valid ? '✓ Valid' : '✗ Invalid';
+        row.insertCell().append(status);
+    }
+
+    article.append(title, table);
+    $('grammar-output').append(article);
+}
