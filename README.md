@@ -10,20 +10,13 @@ Cada expresión pasa por este flujo:
 3. Simulación de la cadena en el AFN.
 
 Los resultados y los autómatas renderizados desde formato DOT se muestran en
-la misma página. Se utiliza `ε` para representar la cadena vacía.
+la misma página. Se utiliza `☻` para representar la cadena vacía.
 
-## Ejecución
+## Gramáticas
 
-```powershell
-pnpm install
-pnpm start
-```
+Las producciones de los archivos CFG se validan con un AFD construido a partir
+de la expresión regular definida en `grammar.ts`. Luego se identifican los
+símbolos anulables y se generan los `2^m` casos posibles para eliminar las
+producciones-ε y mostrar la gramática resultante.
 
-Después, abra `http://localhost:5173/` en el navegador.
-
-Las pruebas y la verificación de tipos se ejecutan con:
-
-```powershell
-pnpm test
-pnpm typecheck
-```
+**Video de ejecución**: <https://youtu.be/-J6qbZcMfTU>
