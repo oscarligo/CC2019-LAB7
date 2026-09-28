@@ -1,0 +1,4 @@
+S -> ABC
+A -> aA | B
+B -> bB | C
+C -> cC | ☻

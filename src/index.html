@@ -6,13 +6,13 @@
         name="viewport"
         content="width=device-width, initial-scale=1.0"
         />
-        <title>Regex to AFN</title>
+        <title>Lexer</title>
         <link rel="stylesheet" href="/styles.css" />
     </head>
 
     <body>
         <main class="container">
-        <h1>Regex to Automaton Converter</h1>
+        <h1>Lexer: Regular Expression to Automaton</h1>
 
 
         <section aria-labelledby="manual-view-title">
@@ -23,14 +23,14 @@
             <div class="controls">
             <input
                 id="regex-input"
-                value="[A-Z]→([A-Za-z0-9]+(\|([A-Za-z0-9]+))*|☻)"
+                value="[A-Z]→([A-Za-z0-9]+|☻)(\|([A-Za-z0-9]+|☻))*"
                 placeholder="Infix expression"
                 autocomplete="off"
             />
 
             <input
                 id="string-input"
-                value="S→a|B"
+                value="S→a|B|☻"
                 placeholder="String to evaluate (ε = empty)"
                 autocomplete="off"
             />

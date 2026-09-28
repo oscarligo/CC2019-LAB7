@@ -1,0 +1,4 @@
+S -> aXbY | Z
+X -> xX | ☻
+Y -> yY | ☻
+Z -> dZ | d
