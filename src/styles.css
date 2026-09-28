@@ -136,46 +136,6 @@ code {
     font-size: 0.86em;
 }
 
-.view-switcher {
-    display: inline-flex;
-    gap: 0;
-    margin-bottom: 2rem;
-    padding: 2px;
-    background: var(--paper-alt);
-    border: 1px solid var(--rule);
-    border-radius: 2px;
-}
-
-.view-switcher button {
-    padding: 0.45rem 1rem;
-    color: var(--ink-muted);
-    background: transparent;
-    border: 0;
-    border-right: 1px solid var(--rule);
-    border-radius: 0;
-    font-family: var(--serif);
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition:
-        color 120ms ease,
-        background-color 120ms ease;
-}
-
-.view-switcher button:last-child {
-    border-right: 0;
-}
-
-.view-switcher button:hover {
-    color: var(--ink);
-    background: rgba(255, 255, 255, 0.45);
-}
-
-.view-switcher button[aria-pressed="true"] {
-    color: var(--ink);
-    background: var(--paper-raised);
-    box-shadow: inset 0 -2px 0 var(--ink);
-}
-
 .controls {
     display: flex;
     gap: 0.75rem;
@@ -229,7 +189,6 @@ code {
 }
 
 .controls button:focus-visible,
-.view-switcher button:focus-visible,
 .simulation-controls button:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
@@ -344,48 +303,6 @@ code {
     font-size: 0.75rem;  
 }
 
-.file-results {
-    display: grid;
-    gap: 3rem;
-}
-
-.case-card {
-    min-width: 0;
-    padding: 1.25rem 1.4rem;
-    background: transparent;
-    border: 1px solid var(--rule);
-    border-left: 4px solid var(--rule-dark);
-}
-
-.case-card.accepted {
-    background: linear-gradient(
-        90deg,
-        var(--success-bg),
-        transparent 38%
-    );
-    border-left-color: var(--success);
-}
-
-.case-card.rejected,
-.case-card.invalid {
-    background: linear-gradient(
-        90deg,
-        var(--danger-bg),
-        transparent 38%
-    );
-    border-left-color: var(--danger);
-}
-
-.case-card .case-title {
-    margin: 0 0 0.9rem;
-    font-size: 1.2rem;
-    font-weight: 600;
-}
-
-.case-card h3 {
-    margin: 1.4rem 0 0.65rem;
-}
-
 .nfa-graph,
 .dfa-graph {
     scrollbar-color: var(--rule) transparent;
@@ -438,24 +355,12 @@ code {
         width: 100%;
     }
 
-    .view-switcher {
-        display: flex;
-        width: 100%;
-    }
-
-    .view-switcher button {
-        flex: 1;
-    }
-
     .nfa-graph,
     .dfa-graph {
         justify-content: flex-start;
         padding: 1rem;
     }
 
-    .case-card {
-        padding: 1rem;
-    }
 }
 
 @media print {
@@ -485,14 +390,12 @@ code {
         box-shadow: none;
     }
 
-    .view-switcher,
     .controls,
     .simulation-controls button {
         display: none;
     }
 
     .result,
-    .case-card,
     .nfa-graph,
     .dfa-graph {
         break-inside: avoid;

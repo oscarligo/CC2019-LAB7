@@ -4,7 +4,6 @@ import { postfixToNFA } from './4-thompson';
 import { renderDFA, renderNFA } from './drawing';
 import { nfaToDFA } from './5-subsets';
 import { minimizeDFA } from './6-partitions';
-import { minimizeDFAWithMyhill } from './6-myhill';
 import { evaluateDFA, evaluateNFA } from './7-simulation';
 import {EPSILON} from './4-thompson';
 
@@ -21,9 +20,8 @@ function processRegex(rawRegex: string) {
     const nfa = postfixToNFA(postfix);
     const dfa = nfaToDFA(nfa);
     const minDfa = minimizeDFA(dfa);
-    const myhillDfa = minimizeDFAWithMyhill(dfa);
 
-    return { regex, explicit, postfix, nfa, dfa, minDfa, myhillDfa };
+    return { regex, explicit, postfix, nfa, dfa, minDfa };
 }
 
 interface SimulationStep {
@@ -85,20 +83,18 @@ function addSimulation(
 
 // Renderiza los autómatas y simula la cadena de entrada
 async function renderGraphs(
-    { nfa, dfa, minDfa, myhillDfa }: Pick<ReturnType<typeof processRegex>, 'nfa' | 'dfa' | 'minDfa' | 'myhillDfa'>,
-    targets: { nfa: HTMLElement; dfa: HTMLElement; minDfa: HTMLElement; myhillDfa: HTMLElement },
+    { nfa, dfa, minDfa }: Pick<ReturnType<typeof processRegex>, 'nfa' | 'dfa' | 'minDfa'>,
+    targets: { nfa: HTMLElement; dfa: HTMLElement; minDfa: HTMLElement },
     rawInput: string,
 ) {
     await renderNFA(nfa, targets.nfa);
     await renderDFA(dfa, targets.dfa);
     await renderDFA(minDfa, targets.minDfa);
-    await renderDFA(myhillDfa, targets.myhillDfa);
 
     const input = rawInput === EPSILON ? '' : rawInput;
     const nfaResult = evaluateNFA(nfa, input);
     const dfaResult = evaluateDFA(dfa, input);
     const minDfaResult = evaluateDFA(minDfa, input);
-    const myhillDfaResult = evaluateDFA(myhillDfa, input);
 
     // 1. NFA: estados activos por cada paso
     addSimulation(
@@ -130,30 +126,8 @@ async function renderGraphs(
         input,
     );
 
-    // 4. DFA minimized with Myhill: start + transitions
-    addSimulation(
-        targets.myhillDfa,
-        [
-            { symbol: null, states: [myhillDfa.start.id] },
-            ...myhillDfaResult.steps.map(s => ({ symbol: s.symbol, states: s.to === null ? [] : [s.to] })),
-        ],
-        myhillDfaResult.accepted,
-        input,
-    );
 }
 
-// Control de vistas
-function setFileView(showFile: boolean): void {
-    $('manual-view').hidden = showFile;
-    $('file-view').hidden = !showFile;
-    $('manual-view-button').setAttribute('aria-pressed', String(!showFile));
-    $('file-view-button').setAttribute('aria-pressed', String(showFile));
-}
-
-$('manual-view-button').onclick = () => setFileView(false);
-$('file-view-button').onclick = () => setFileView(true);
-
-// Vista manual
 async function drawManual(): Promise<void> {
     const errorEl = $('error-output');
     errorEl.textContent = '';
@@ -174,7 +148,6 @@ async function drawManual(): Promise<void> {
                 nfa: $('nfa-container'),
                 dfa: $('dfa-container'),
                 minDfa: $('minimized-dfa-container'),
-                myhillDfa: $('myhill-dfa-container'),
             },
             ($('string-input') as HTMLInputElement)?.value ?? ''
         );
@@ -190,59 +163,3 @@ $('regex-form').onsubmit = (event) => {
 };
 
 void drawManual();
-
-// Vista por archivo
-async function drawFileResults(): Promise<void> {
-    const container = $('file-results');
-
-    try {
-        const response = await fetch('/api/inputs');
-        const data = await response.json();
-
-        if (!response.ok || !Array.isArray(data)) {
-            throw new Error(data?.error ?? 'Failed to load file items');
-        }
-
-        for (const item of data) {
-            const card = document.createElement('article');
-            card.className = 'case-card';
-            container.append(card);
-
-            try {
-                const result = processRegex(item.regex);
-
-                card.innerHTML = `
-                    <h2 class="case-title">Infix Regular Expression: <code>${result.regex}</code></h2>
-                    <h2 class="case-title">Postfix expression: <code>${result.postfix}</code></h2>
-                    <h2 class="case-title">String to evaluate: <code>${item.value}</code></h2>
-
-                    <h3>NFA (Thompson algorithm)</h3>
-                    <div class="nfa-graph" role="img" aria-label="NFA of ${result.regex}"></div>
-
-                    <h3>DFA (subset construction algorithm)</h3>
-                    <div class="dfa-graph" role="img" aria-label="DFA of ${result.regex}"></div>
-
-                    <h3>DFA Minimized (partitioning algorithm)</h3>
-                    <div class="dfa-graph" role="img" aria-label="Minimized DFA of ${result.regex}"></div>
-
-                    <h3>DFA Minimized (Myhill theorem)</h3>
-                    <div class="dfa-graph" role="img" aria-label="DFA minimized with Myhill for ${result.regex}"></div>
-                `;
-
-                const [nfaEl, dfaEl, minDfaEl, myhillDfaEl] = card.querySelectorAll<HTMLElement>('.nfa-graph, .dfa-graph');
-                await renderGraphs(
-                    result,
-                    { nfa: nfaEl, dfa: dfaEl, minDfa: minDfaEl, myhillDfa: myhillDfaEl },
-                    item.value,
-                );
-            } catch (err) {
-                card.className = 'case-card invalid';
-                card.innerHTML = `<p class="error">Line ${item.line}: ${err instanceof Error ? err.message : 'Unknown error'}</p>`;
-            }
-        }
-    } catch (err) {
-        container.textContent = err instanceof Error ? err.message : 'Failed to display results';
-    }
-}
-
-void drawFileResults();
