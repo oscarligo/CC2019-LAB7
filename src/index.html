@@ -15,16 +15,7 @@
         <h1>Regex to Automaton Converter</h1>
 
 
-        <nav class="view-switcher" aria-label="Main views">
-            <button id="manual-view-button" type="button" aria-controls="manual-view" aria-pressed="true">
-                Manual expression
-            </button>
-            <button id="file-view-button" type="button" aria-controls="file-view" aria-pressed="false">
-                Automatons from regex.txt
-            </button>
-        </nav>
-
-        <section id="manual-view" aria-labelledby="manual-view-title">
+        <section aria-labelledby="manual-view-title">
         <h2 id="manual-view-title">Infix expression</h2>
 
         <form id="regex-form">
@@ -32,14 +23,14 @@
             <div class="controls">
             <input
                 id="regex-input"
-                value="abb"
+                value="[A-Z]→([A-Za-z0-9]+(\|([A-Za-z0-9]+))*|☻)"
                 placeholder="Infix expression"
                 autocomplete="off"
             />
 
             <input
                 id="string-input"
-                value="aaa"
+                value="S→a|B"
                 placeholder="String to evaluate (ε = empty)"
                 autocomplete="off"
             />
@@ -70,16 +61,8 @@
         <h3> DFA (subset construction algorithm)</h3>
         <div id="dfa-container" class="dfa-graph" role="img" aria-label="DFA of the regular expression"></div>
 
-        <h3> DFA Minimized (partitioning algorithm)</h3>
+        <h3> Minimized DFA  (partitioning algorithm)</h3>
         <div id="minimized-dfa-container" class="dfa-graph" role="img" aria-label="DFA of the regular expression"></div>
-
-        <h3> DFA Minimized (Myhill theorem)</h3>
-        <div id="myhill-dfa-container" class="dfa-graph" role="img" aria-label="DFA minimized with Myhill"></div>
-        </section>
-
-        <section id="file-view" aria-labelledby="file-view-title" hidden>
-            <h2 id="file-view-title">Automatons from a regex.txt file</h2>
-            <div id="file-results" class="file-results"></div>
         </section>
         </main>
 

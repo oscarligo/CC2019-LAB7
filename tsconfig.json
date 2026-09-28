@@ -3,7 +3,6 @@
         "target": "ESNext",
         "module": "ESNext",
         "moduleResolution": "bundler",
-        "allowImportingTsExtensions": true,
         "types": ["node", "vite/client"],
         "strict": true,
         "skipLibCheck": true
