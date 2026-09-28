@@ -6,7 +6,7 @@ import { nfaToDFA } from './5-subsets';
 import { minimizeDFA } from './6-partitions';
 import { evaluateDFA, evaluateNFA } from './7-simulation';
 import {EPSILON} from './4-thompson';
-import { validateGrammarLines } from './grammar';
+import { eliminateEpsilonProductions, validateGrammarLines } from './grammar';
 
 const grammarFiles = import.meta.glob('../cfg/*.txt', {
     eager: true,
@@ -102,12 +102,12 @@ function addSimulation(
         if (finished) row.className = accepted ? 'success-row' : 'failure-row';
         progress.value = index;
         progress.className = finished ? (accepted ? 'accepted' : 'rejected') : '';
-        progress.setAttribute('aria-label', `Paso ${index} de ${characters.length}`);
+        progress.setAttribute('aria-label', `Step ${index} of ${characters.length}`);
         progressLabel.textContent = `${index}/${characters.length}`;
 
         const inputCell = row.insertCell();
         const inputElement = document.createElement(step.symbol === null ? 'span' : 'kbd');
-        inputElement.textContent = step.symbol ?? 'Inicio';
+        inputElement.textContent = step.symbol ?? 'Initial';
         if (step.symbol === null) inputElement.className = 'badge initial';
         inputCell.append(inputElement);
 
@@ -258,5 +258,46 @@ for (const [path, source] of Object.entries(grammarFiles).sort()) {
     }
 
     article.append(title, table);
+
+    if (allValid) {
+        const elimination = eliminateEpsilonProductions(source);
+        const subtitle = document.createElement('h4');
+        subtitle.textContent = 'Epsilon-production elimination';
+        const nullableSummary = document.createElement('p');
+        nullableSummary.textContent = `Nullable symbols: ${elimination.nullable.join(', ') || 'None'}. Nullable productions: ${elimination.nullableProductions.join(', ') || 'None'}.`;
+
+        const stepsContainer = document.createElement('div');
+        stepsContainer.className = 'trace-table-container';
+        const stepsTable = document.createElement('table');
+        stepsTable.className = 'trace-table grammar-table';
+        stepsTable.innerHTML = '<thead><tr><th>Step</th><th>Production</th><th>Nullable symbols</th><th>Cases</th><th>Generated productions</th></tr></thead>';
+        const stepsBody = stepsTable.createTBody();
+        elimination.steps.forEach((step, index) => {
+            const row = stepsBody.insertRow();
+            row.insertCell().textContent = String(index + 1);
+            row.insertCell().textContent = step.production;
+            row.insertCell().textContent = step.nullableSymbols.join(', ') || '—';
+            row.insertCell().textContent = `${step.cases} (2^${step.nullableSymbols.length})`;
+            row.insertCell().textContent = step.generated
+                .map(production => production === '☻' ? '☻ (removed)' : production)
+                .join(' | ');
+        });
+        stepsContainer.append(stepsTable);
+
+        const resultTitle = document.createElement('h4');
+        resultTitle.textContent = 'Grammar without epsilon productions';
+        const resultTable = document.createElement('table');
+        resultTable.className = 'trace-table grammar-table';
+        resultTable.innerHTML = '<thead><tr><th>Nonterminal</th><th>Productions</th></tr></thead>';
+        const resultBody = resultTable.createTBody();
+        for (const production of elimination.result) {
+            const [left, right] = production.split('→');
+            const row = resultBody.insertRow();
+            row.insertCell().textContent = left!;
+            row.insertCell().textContent = right!.split('|').join(' | ');
+        }
+
+        article.append(subtitle, nullableSummary, stepsContainer, resultTitle, resultTable);
+    }
     $('grammar-output').append(article);
 }
