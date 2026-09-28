@@ -36,6 +36,7 @@ function addSimulation(
     steps: SimulationStep[],
     accepted: boolean,
     input: string,
+    acceptingStateIds: Set<number>,
 ): void {
     if (graph.nextElementSibling?.classList.contains('simulation-controls')) {
         graph.nextElementSibling.remove();
@@ -44,18 +45,40 @@ function addSimulation(
     const controls = document.createElement('div');
     controls.className = 'simulation-controls';
     controls.innerHTML = `
-        <button type="button">Simulate step by step</button>
-        <p class="simulation-status" aria-live="polite"></p>
+        <button type="button">Step by step simulation</button>
+        <div class="simulation-progress">
+            <progress value="0" max="1" aria-label="Progress"></progress>
+            <span>0/${[...input].length}</span>
+        </div>
+        <div class="trace-table-container">
+            <table class="trace-table">
+                <thead><tr>
+                    <th>Input</th>
+                    <th>Active States</th>
+                    <th>Remaining Buffer</th>
+                    <th>Diagnostic</th>
+                </tr></thead>
+                <tbody aria-live="polite"></tbody>
+            </table>
+        </div>
     `;
     graph.after(controls);
 
     const button = controls.querySelector('button')!;
-    const status = controls.querySelector<HTMLElement>('.simulation-status')!;
+    const tbody = controls.querySelector<HTMLTableSectionElement>('tbody')!;
+    const progress = controls.querySelector<HTMLProgressElement>('progress')!;
+    const progressLabel = controls.querySelector<HTMLElement>('.simulation-progress span')!;
     const characters = [...input];
+    progress.max = Math.max(characters.length, 1);
     let index = -1;
 
     button.onclick = () => {
-        index = index === steps.length - 1 ? 0 : index + 1;
+        if (index === steps.length - 1) {
+            tbody.replaceChildren();
+            index = 0;
+        } else {
+            index++;
+        }
         const step = steps[index];
         const activeIds = new Set(step.states.map(String));
         const finished = index === steps.length - 1;
@@ -68,14 +91,36 @@ function addSimulation(
             node.classList.toggle('active-state', activeIds.has(title) || activeIds.has(cleanTitle));
         }
 
-        status.className = `simulation-status${finished ? accepted ? ' accepted' : ' rejected' : ''}`;
-        status.textContent = [
-            `Step ${index}/${characters.length}`,
-            step.symbol === null ? 'Initial state' : `Read "${step.symbol}"`,
-            `Active: [${step.states.join(', ') || EPSILON}]`,
-            `Remaining: ${characters.slice(index).join('') || EPSILON}`,
-            finished ? (accepted ? 'w ∈ L(r)' : 'w ∉ L(r)') : '',
-        ].filter(Boolean).join(' --- ');
+        const row = tbody.insertRow();
+        if (finished) row.className = accepted ? 'success-row' : 'failure-row';
+        progress.value = index;
+        progress.className = finished ? (accepted ? 'accepted' : 'rejected') : '';
+        progress.setAttribute('aria-label', `Paso ${index} de ${characters.length}`);
+        progressLabel.textContent = `${index}/${characters.length}`;
+
+        const inputCell = row.insertCell();
+        const inputElement = document.createElement(step.symbol === null ? 'span' : 'kbd');
+        inputElement.textContent = step.symbol ?? 'Inicio';
+        if (step.symbol === null) inputElement.className = 'badge initial';
+        inputCell.append(inputElement);
+
+        const statesCell = row.insertCell();
+        for (const state of step.states) {
+            const pill = document.createElement('span');
+            pill.className = `state-pill${acceptingStateIds.has(state) ? ' accepting' : ''}`;
+            pill.textContent = `${state}${acceptingStateIds.has(state) ? '★' : ''}`;
+            statesCell.append(pill);
+        }
+        if (!step.states.length) statesCell.textContent = EPSILON;
+
+        const buffer = document.createElement('code');
+        buffer.textContent = characters.slice(index).join('') || EPSILON;
+        row.insertCell().append(buffer);
+
+        const diagnostic = document.createElement('span');
+        diagnostic.className = finished ? `badge ${accepted ? 'success' : 'failure'}` : 'status-running';
+        diagnostic.textContent = finished ? (accepted ? 'w ∈ L(r)' : 'w ∉ L(r)') : 'In progress';
+        row.insertCell().append(diagnostic);
         
         button.textContent = finished ? 'Restart simulation' : 'Next step';
     };
@@ -102,6 +147,7 @@ async function renderGraphs(
         nfaResult.steps.map(s => ({ symbol: s.symbol, states: s.nextStates })),
         nfaResult.accepted,
         input,
+        new Set([nfa.accept.id]),
     );
 
     // 2. DFA: inicio + transiciones
@@ -113,6 +159,7 @@ async function renderGraphs(
         ],
         dfaResult.accepted,
         input,
+        new Set(dfa.states.filter(state => state.isAccept).map(state => state.id)),
     );
 
     // 3. Minimized DFA: inicio + transiciones
@@ -124,6 +171,7 @@ async function renderGraphs(
         ],
         minDfaResult.accepted,
         input,
+        new Set(minDfa.states.filter(state => state.isAccept).map(state => state.id)),
     );
 
 }

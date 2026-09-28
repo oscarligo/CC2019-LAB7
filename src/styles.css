@@ -283,24 +283,94 @@ code {
     background: var(--ink);
 }
 
-.simulation-status {
-    min-height: 1.5em;
-    margin: 0;
-    color: var(--ink-muted);
+.trace-table-container {
+    overflow-x: auto;
+}
+
+.trace-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid var(--rule);
+    font-size: 0.82rem;
+}
+
+.trace-table th,
+.trace-table td {
+    padding: 0.55rem 0.65rem;
+    border: 1px solid var(--rule);
+    text-align: left;
+    vertical-align: middle;
+}
+
+.trace-table th {
+    background: var(--paper-alt);
+    font-weight: 700;
+}
+
+.simulation-progress {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
     font-family: var(--mono);
     font-size: 0.82rem;
 }
 
-.simulation-status.accepted {
-    color: var(--success);
-    font-weight: 700;
-    font-size: 0.75rem;  
+.simulation-progress progress {
+    flex: 1;
+    height: 0.75rem;
+    accent-color: var(--ink);
 }
 
-.simulation-status.rejected {
-    color: var(--danger);
+.simulation-progress progress.accepted {
+    accent-color: var(--success);
+}
+
+.simulation-progress progress.rejected {
+    accent-color: var(--danger);
+}
+
+.trace-table kbd,
+.badge,
+.state-pill,
+.status-running {
+    display: inline-block;
+    font-family: var(--mono);
+}
+
+.state-pill {
+    margin: 0.1rem 0.25rem 0.1rem 0;
+    padding: 0.05rem 0.45rem;
+    border: 1px solid var(--rule-dark);
+    border-radius: 999px;
+}
+
+.state-pill.accepting {
+    color: var(--success);
+    border-color: var(--success);
     font-weight: 700;
-    font-size: 0.75rem;  
+}
+
+.badge {
+    padding: 0.08rem 0.45rem;
+    border-radius: 2px;
+    font-weight: 700;
+}
+
+.badge.initial,
+.status-running {
+    color: var(--ink-muted);
+}
+
+.badge.success,
+.success-row {
+    color: var(--success);
+    background: var(--success-bg);
+}
+
+.badge.failure,
+.failure-row {
+    color: var(--danger);
+    background: var(--danger-bg);
 }
 
 .nfa-graph,
